@@ -7,7 +7,7 @@
 ---
 
 ##  Project Overview
-This project is a solution for the famous [Kaggle House Prices Competition](https://www.kaggle.com/c/house-prices-advanced-regression-techniques). The objective is to predict the sales price of houses in Ames, Iowa, based on 79 explanatory variables describing (almost) every aspect of residential homes.
+This project is a solution for the famous [Kaggle House Prices Competition](https://www.kaggle.com/c/house-prices-advanced-regression-techniques). The objective is to predict the sales price of houses in Ames, Iowa, based on 79 explanatory variables describing (almost) every aspect of residential homes.(you will find the Dataset in kaggle)
 
 The solution uses a professional Data Science workflow, featuring robust data cleaning, domain-specific feature engineering, and an ensemble of linear and tree-based models.
 
