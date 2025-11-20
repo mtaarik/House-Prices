@@ -1,0 +1,11 @@
+# Virtual Environment
+.venv/
+venv/
+
+# Data files (usually too large for Git)
+*.csv
+*.zip
+*.gz
+
+# Jupyter Notebook Checkpoints
+.ipynb_checkpoints/
