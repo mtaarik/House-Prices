@@ -1,81 +1,62 @@
 # Kaggle House Prices: Advanced Regression Techniques
 
-**Author:** Mohamed Amine Tarik  
-**Status:** Completed  
-**Goal:** Predict final house prices using advanced regression techniques and feature engineering.
+Predicting the sale price of houses in Ames, Iowa, from 79 explanatory variables
+([Kaggle competition](https://www.kaggle.com/c/house-prices-advanced-regression-techniques)).
+The work focuses on careful preprocessing, domain-driven feature engineering and a blend of a
+linear model and a tree-based model, all validated with 5-fold cross-validation.
 
----
+## Results
 
-##  Project Overview
-This project is a solution for the famous [Kaggle House Prices Competition](https://www.kaggle.com/c/house-prices-advanced-regression-techniques). The objective is to predict the sales price of houses in Ames, Iowa, based on 79 explanatory variables describing (almost) every aspect of residential homes.(you will find the Dataset in kaggle)
+Metric: RMSE on `log1p(SalePrice)`, which is the competition's RMSLE. 5-fold cross-validation on the
+training set.
 
-The solution uses a professional Data Science workflow, featuring robust data cleaning, domain-specific feature engineering, and an ensemble of linear and tree-based models.
+| Model | CV RMSE (log) | Std |
+|---|---|---|
+| Ridge | 0.1189 | 0.0095 |
+| **Lasso (tuned)** | **0.1112** | 0.0076 |
+| XGBoost | 0.1169 | 0.0053 |
+| Final submission | 50% Lasso + 50% XGBoost blend | |
 
-##  Project Structure
+Lasso kept 120 of the 347 engineered features, which also gives a readable view of the price
+drivers.
+
+## Methodology
+
+### 1. Preprocessing
+- **Target:** `log1p` transform of `SalePrice` to correct its strong right skew and match the metric.
+- **Outliers:** removal of the bivariate outliers in `GrLivArea` vs `SalePrice`.
+- **Missing values:**
+  - categorical features where missing means "absent" (e.g. `PoolQC`) are filled with `"None"`;
+  - numerical features where missing means zero (e.g. `GarageArea`) are filled with `0`;
+  - `LotFrontage` is filled with the median of its `Neighborhood`.
+
+### 2. Feature engineering
+- New aggregate features: `TotalSF` (total square footage), `TotalBath`, `GarageAge`.
+- `log1p` transform of every numerical feature with skewness above 0.75.
+- One-hot encoding of the categorical features (e.g. `Neighborhood`).
+
+### 3. Modeling
+- **Validation:** 5-fold cross-validation (`KFold`).
+- **Lasso (L1):** automatic feature selection through sparse coefficients, `alpha` tuned with
+  `GridSearchCV`.
+- **XGBoost:** captures non-linear effects and interactions.
+- **Blend:** the average of both predictions reduces variance.
+
+## Repository structure
 
 ```text
-kaggle-house-prices/
-├── data/
-│   ├── train.csv           # Raw training data
-│   ├── test.csv            # Raw test data
-│   ├── processed/          # Cleaned and transformed data (X_train, X_test, etc.)
-│   └── submission.csv      # Final predictions for Kaggle
-├── models/
-│   ├── lasso_tuned.pkl     # Serialized Lasso model (Best Alpha)
-│   └── xgboost.pkl         # Serialized XGBoost model
-├── notebooks/
-│   ├── 01-eda-and-setup.ipynb  # Exploratory Analysis, Cleaning, & Feature Engineering
-│   └── 02-modeling.ipynb       # Cross-Validation, Hyperparameter Tuning, & Ensembling
-└── README.md
+Notebooks/
+  01-eda-and-setup.ipynb   exploration, cleaning and feature engineering
+  02-modeling.ipynb        cross-validation, tuning and blending
+data/
+  data_description.txt     description of the 79 variables
+```
 
- Methodology
-1. Data Preprocessing
-Target Transformation: Applied log1p transform to SalePrice to correct high skewness and satisfy the RMSLE evaluation metric.
+## Run it
 
-Outlier Removal: Identified and removed bivariate outliers in GrLivArea vs SalePrice.
-
-Missing Value Imputation:
-
-Categorical (e.g., PoolQC): Imputed with "None" (indicating absence).
-
-Numerical (e.g., GarageArea): Imputed with 0.
-
-LotFrontage: Imputed using the median of the specific Neighborhood.
-
-2. Feature Engineering
-Creation: Created aggregated features like TotalSF (Total Square Footage), TotalBath, and GarageAge.
-
-Transformation: Applied log1p transform to all skewed numerical features (skew > 0.75).
-
-Encoding: Used One-Hot Encoding for categorical variables to handle non-ordinal relationships (e.g., Neighborhood).
-
-3. Modeling & Strategy
-Validation: Used 5-Fold Cross-Validation (KFold) to ensure model stability.
-
-Model 1: Lasso Regression (L1):
-
-Used for automatic feature selection (sparse coefficients).
-
-Hyperparameters tuned via GridSearchCV.
-
-Model 2: XGBoost:
-
-Used to capture non-linear relationships and complex interactions.
-
-Ensemble:
-
-Blended predictions (50% Lasso + 50% XGBoost) to reduce variance and improve generalization.
-
- Results
-Evaluation Metric: Root Mean Squared Logarithmic Error (RMSLE).
-
-CV Performance: ~0.1112 (Lasso) / ~0.1169 (XGBoost).
-
- How to Run
-Clone the repository.
-
-Install dependencies: pandas, numpy, scikit-learn, xgboost, matplotlib, seaborn.
-
-Run notebooks/01-eda-and-setup.ipynb to generate processed data.
-
-Run notebooks/02-modeling.ipynb to train models and generate submission.csv.
+1. Download `train.csv` and `test.csv` from the
+   [competition page](https://www.kaggle.com/c/house-prices-advanced-regression-techniques/data)
+   into `data/`.
+2. Install the dependencies: `pip install pandas numpy scikit-learn xgboost matplotlib seaborn`.
+3. Run `Notebooks/01-eda-and-setup.ipynb` to build the processed data, then
+   `Notebooks/02-modeling.ipynb` to train the models and write `submission.csv`.
